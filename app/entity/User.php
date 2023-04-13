@@ -283,6 +283,14 @@ class User extends Entity
         return Storage::getRoom($this->room);
     }
 
+    public function leaveRoom()
+    {
+        if ($room = $this->getRoom()) {
+            $room->leave($this->id);
+        }
+        return $this;
+    }
+
     public function isTurnToMe()
     {
         $room = $this->getRoom();

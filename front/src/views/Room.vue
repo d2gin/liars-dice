@@ -72,7 +72,7 @@
                         </el-tag>
                         <span>{{playerInfo.nickname}}</span>
                     </el-form-item>
-                    <template v-if="playerInfo.room.is_turn_to_me && room.status == 2">
+                    <template v-if="(playerInfo.room.is_turn_to_me && room.status == 2)">
                         <el-form-item label="上次" v-if="playerInfo.guess">
                             {{playerInfo.guess.num}}个{{playerInfo.guess.point}}
                         </el-form-item>
@@ -82,13 +82,13 @@
                         <el-form-item label="叫骰">
                             <el-row :gutter="5">
                                 <el-col :span="6">
-                                    <el-input v-model="guess.num" type="number"/>
+                                    <el-input-number class="point-num" v-model="guess.num" :min="1" step-strictly />
                                 </el-col>
                                 <el-col :span="2" style="text-align: center">
                                     个
                                 </el-col>
                                 <el-col :span="6">
-                                    <el-input v-model="guess.point" type="number"/>
+                                    <el-input-number class="point-num" v-model="guess.point" :min="1" step-strictly/>
                                 </el-col>
                                 <el-col :span="3">
                                     <el-checkbox v-model="isPozhai" v-if="room.is_zhai">破斋</el-checkbox>
@@ -407,4 +407,10 @@
             margin-bottom: 10px;
         }
     }
+
+    .point-num {
+        width: auto!important;
+
+    }
+
 </style>

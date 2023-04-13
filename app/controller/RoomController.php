@@ -47,7 +47,7 @@ class RoomController extends BaseController
             //if ($member == $this->user->id) continue;
             $player = Storage::getPlayerById($member);
             if (!$player) continue;
-            $isPrev    = $member == $prevUser;
+            $isPrev    = $member == $prevUser && $member != $this->user->id;
             $members[] = [
                 'id'        => $player->id,
                 'nickname'  => $player->nickname,

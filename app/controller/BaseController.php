@@ -29,6 +29,10 @@ abstract class BaseController
             if ($this->user) {
                 $this->user->updatedAt = time();
                 $this->user->setOnline(true);
+                // 活跃房间
+                if ($room = $this->user->getRoom()) {
+                    $room->setUpdatedAt(time());
+                }
             }
         }
     }

@@ -311,6 +311,17 @@ class Room extends Entity
     }
 
     /**
+     * @param mixed $updatedAt
+     * @return Room
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+        Storage::setRoom($this);
+        return $this;
+    }
+
+    /**
      * @return mixed
      */
     public function getUpdatedAt()

@@ -4,6 +4,7 @@
 namespace process;
 
 
+use app\entity\Room;
 use app\entity\User;
 use app\game\Storage;
 use icy8\SocketIO\Server;
@@ -34,13 +35,17 @@ class Game
 
         $this->server->on('workerStart', function () {
             Storage::delAllConnection();
-            Timer::add(0.1, [$this, 'playerTimer']);
+            Timer::add(0.1, [$this, 'cleanTimer']);
         });
         $this->server->on('connection', function (Socket $socket) {
             Storage::setConnection($socket->id);
             $socket->emit('connection', ['id' => $socket->id]);
             $socket->emit('rooms_update');
             $this->server->emit('statistics_update');
+            // 这个客户端的pong答复
+            $socket->on('pong', function () use ($socket) {
+                $socket->emit('player_update');
+            });
         });
         $this->server->on('disconnect', function (Socket $socket) {
             Storage::delConnection($socket->id);
@@ -53,7 +58,7 @@ class Game
             }
             $this->server->emit('statistics_update');
         });
-        $this->server->on('subcribe', function ($socket, $channel, $info) {
+        $this->server->on('subcribe', function (Socket $socket, $channel, $info) {
             $token  = $info['token'] ?? '';
             $player = Storage::getPlayer($token);
             if (!$player) {
@@ -68,19 +73,30 @@ class Game
         $this->server->worker()->run();
     }
 
-    public function playerTimer()
+    public function cleanTimer()
     {
+        $expire = 15 * 60; //
         /* @var User $player */
         foreach (Storage::getAllPlayer() as $player) {
-//            if (Storage::getConnection($player->connectionId)) {
-//                $player->setOnline(true);
-//            } else {
-//                $player->setOnline(false);
-//            }
-            if (!$player->online && (time() - $player->getUpdatedAt()) > 86400 * 3) {
-                //
+            if (!$player->online && (time() - $player->getUpdatedAt()) >= $expire) {
+                // 先退出房间
+                $player->leaveRoom();
+                // 清理没活动的用户
+                // Storage::delPlayer($player->token);
             }
         }
+        // 清理房间数据
+        /* @var Room $room */
+//        foreach (Storage::getAllRoom() as $room) {
+//            if (empty($room->members)) {
+//                Storage::delRoom($room->getId());
+//            } else if (!$player->online && (time() - $player->getUpdatedAt()) >= $expire) {
+//                foreach ($room->members as $uid) {
+//                    $room->leave($uid);
+//                }
+//                Storage::delRoom($room->getId());
+//            }
+//        }
     }
 
     public function onConnect(TcpConnection $connection)
